@@ -82,3 +82,7 @@ void setDialogTitle(int dialogTitle);
             e.printStackTrace();
         }
 ```
+
+
+Thanks for [@danielemaddaluno](https://github.com/danielemaddaluno/Android-Update-Checker) and your library
+
