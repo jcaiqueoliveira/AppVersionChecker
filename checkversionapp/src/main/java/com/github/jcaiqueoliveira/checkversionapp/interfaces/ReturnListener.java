@@ -5,5 +5,5 @@ package com.github.jcaiqueoliveira.checkversionapp.interfaces;
  */
 
 public interface ReturnListener {
-    void OnReturnListener(boolean hasUpdate);
+    void onReturnListener(boolean hasUpdate);
 }

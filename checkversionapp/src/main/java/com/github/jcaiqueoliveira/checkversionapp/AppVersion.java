@@ -2,11 +2,11 @@ package com.github.jcaiqueoliveira.checkversionapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+
 import com.github.jcaiqueoliveira.checkversionapp.interfaces.ReturnConfiguration;
 import com.github.jcaiqueoliveira.checkversionapp.interfaces.ReturnListener;
 import com.github.jcaiqueoliveira.checkversionapp.request.RequestVersionApp;
@@ -20,7 +20,6 @@ import com.github.jcaiqueoliveira.checkversionapp.utils.TypeMode;
 public class AppVersion implements ReturnConfiguration, ReturnListener {
     private String currentVersion;
     private String packageName;
-    private Context context;
     private Activity activity;
     private String dialogTitle;
     private String dialogMessage;
@@ -28,27 +27,35 @@ public class AppVersion implements ReturnConfiguration, ReturnListener {
     private boolean forceUpdate = false;
     private int returnMode;
     private Intent intent;
-    private ReturnListener returnInBackground;
+    private ReturnListener mListener;
     private String textUpdateButton;
     private LocalAppInformation localAppInformation;
 
     public AppVersion(Activity activity, Intent intent) throws PackageManager.NameNotFoundException {
         this.activity = activity;
-        this.context = activity.getApplicationContext();
         this.intent = intent;
-        this.currentVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-        this.packageName = context.getPackageName();
+        this.currentVersion = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0).versionName;
+        this.packageName = activity.getPackageName();
+        returnMode = TypeMode.RETURN_WITH_SHOW_DIALOG;
         loadLocalInformations();
+    }
+
+    public AppVersion(Activity activity, ReturnListener returnListener) throws PackageManager.NameNotFoundException {
+        this.activity = activity;
+        this.currentVersion = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0).versionName;
+        this.mListener = returnListener;
+        loadLocalInformations();
+        returnMode = TypeMode.RETURN_IN_BACKGROUND;
     }
 
     @Override
     public void setDialogTitle(int dialogTitle) {
-        this.dialogTitle = context.getString(dialogTitle);
+        this.dialogTitle = activity.getString(dialogTitle);
     }
 
     @Override
     public void setDialogMessage(int dialogMessage) {
-        this.dialogMessage = context.getString(dialogMessage);
+        this.dialogMessage = activity.getString(dialogMessage);
     }
 
     @Override
@@ -61,19 +68,20 @@ public class AppVersion implements ReturnConfiguration, ReturnListener {
         this.forceUpdate = isToForce;
     }
 
-    @Override
-    public void setReturnMode(@TypeMode.ReturnMode int mode) {
-        this.returnMode = mode;
-    }
-
+    /**
+     * @param returnInBackground
+     * @Deprecated Use the constructor with the listener
+     */
+    @Deprecated
     @Override
     public void setListener(ReturnListener returnInBackground) {
-        this.returnInBackground = returnInBackground;
+        this.mListener = returnInBackground;
     }
+
 
     @Override
     public void setTextUpdateButton(int textUpdateButton) {
-        this.textUpdateButton = context.getString(textUpdateButton);
+        this.textUpdateButton = activity.getString(textUpdateButton);
     }
 
     @Override
@@ -82,23 +90,24 @@ public class AppVersion implements ReturnConfiguration, ReturnListener {
     }
 
     public void runVerification() {
-        new RequestVersionApp(localAppInformation,this).execute();
+        new RequestVersionApp(localAppInformation, this).execute();
     }
 
     @Override
-    public void OnReturnListener(boolean hasUpdate) {
+    public void onReturnListener(boolean hasUpdate) {
         if (hasUpdate && returnMode == TypeMode.RETURN_WITH_SHOW_DIALOG) {
             if (builder == null) {
                 createDialog();
             }
             builder.show();
         } else if (returnMode == TypeMode.RETURN_IN_BACKGROUND) {
-            if (returnInBackground != null)
-                returnInBackground.OnReturnListener(hasUpdate);
+            if (mListener != null)
+                mListener.onReturnListener(hasUpdate);
             else
                 throw new NullPointerException("Listener not found. You have set the returnListener?");
         } else {
             activity.startActivity(intent);
+            activity.finish();
         }
     }
 

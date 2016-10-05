@@ -1,5 +1,5 @@
 # AppVersionChecker 1.0
-Library to check if exists a new version of the app
+Library to check if exists a new version of your app
 ## Dependencies
 [Jsoup](http://jsoup.org)
 ## Using the library
@@ -33,8 +33,6 @@ void setDialogTitle(int dialogTitle);
 
     void setForceUpdate(boolean isToForce):  if true the dialog not show a close dialog button;
 
-    void setReturnMode(@TypeMode.ReturnMode int mode) mode background or with dialog;
-
     void setListener(ReturnListener returnInBackground) if you set the return mode to background you need implement a return listener  and create your action; 
 
     void setTextUpdateButton(int textUpdateButton) set the text of positive button;
@@ -53,7 +51,6 @@ void setDialogTitle(int dialogTitle);
             appVersion.setDialogTitle(R.string.app_name);
             appVersion.setForceUpdate(true);
             appVersion.setTextUpdateButton(R.string.yes);
-            appVersion.setReturnMode(TypeMode.RETURN_WITH_SHOW_DIALOG);
             appVersion.runVerification();
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -64,19 +61,13 @@ void setDialogTitle(int dialogTitle);
 
 ``` java 
  try {
-            AppVersion appVersion = new AppVersion(this, new Intent(this, MainActivity.class));
-            appVersion.setTimeOut(5000);
-            appVersion.setDialogMessage(R.string.you_are_updated_message);
-            appVersion.setDialogTitle(R.string.app_name);
-            appVersion.setForceUpdate(true);
-            appVersion.setTextUpdateButton(R.string.yes);
-            appVersion.setReturnMode(TypeMode.RETURN_IN_BACKGROUND);
-            appVersion.setListener(new ReturnListener() {
+            AppVersion appVersion = new AppVersion(this, new ReturnListener() {
                 @Override
-                public void OnReturnListener(boolean b) {
+                public void onReturnListener(boolean b) {
                     
                 }
             });
+            appVersion.setTimeOut(5000); //default is 5000
             appVersion.runVerification();
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();

@@ -16,8 +16,6 @@ public interface ReturnConfiguration {
 
     void setForceUpdate(boolean isToForce);
 
-    void setReturnMode(@TypeMode.ReturnMode int mode);
-
     void setListener(ReturnListener returnInBackground);
 
     void setTextUpdateButton(int textUpdateButton);
